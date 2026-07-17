@@ -6,6 +6,7 @@
 #include "pregame.hpp"
 #include "players.h"
 #include "team_lut.hpp"
+#include "pos_lut.hpp"
 
 void logTeam(int team, int player){
     Terminal::reset();
@@ -21,11 +22,12 @@ void logTeam(int team, int player){
             tempPlayer++;
             continue;
         }else{
-            Terminal::log("#%% %% %%, %%", 
+            Terminal::log("#%% %%. %%, %% : %% Overall", 
                 players_data[i].jersey_number, 
-                players_data[i].first_name, 
+                players_data[i].first_name[0], 
                 players_data[i].last_name,
-                players_data[i].position_short_label
+                positions[players_data[i].pos_id],
+                players_data[i].overall_rating
             );
             break;
         }
