@@ -9,7 +9,7 @@
 GameState postgameState(){
 
     saveData* sd = getSaveData();
-    Terminal::log("You pressed A %% times!", sd->currWave);
+    Terminal::log("You pressed A %% times!", sd->currSeed);
 
     while(!key_hit(KEY_B)){
         key_poll();

@@ -1,21 +1,6 @@
 #include "save.hpp"
 #include "tonc.h"
 
-saveData mockSaveData = {
-    0,
-    {
-        {
-            true,
-            "Jacob",
-            0,
-            {0},
-            1,
-            1,
-            1,
-            1
-        }
-    }
-};
 
 static saveData g_saveData;
 static bool g_saveDataLoaded = false;
@@ -35,7 +20,7 @@ void save(){
 
 void load(){
     //TODO: remove for real game save data
-    u8* cpySrc = (u8*)&mockSaveData;
+    u8* cpySrc = sram_mem;
     u8* cpyDst = (u8*)&g_saveData;
 
     sramCpy(cpySrc, cpyDst);
