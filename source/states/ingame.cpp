@@ -7,52 +7,55 @@
 #include "save.hpp"
 #include "play.hpp"
 #include "team_lut.hpp"
-#include "players.h"
+#include "season.hpp"
 
-static void logPlay(const PlayResult& result){
-    switch(result.type){
-        case PLAY_RUN:
-            if(result.turnover) Terminal::log("Run, FUMBLE!");
-            else Terminal::log("#%% %% run for %% yds", players_data[result.offenseCredit].jersey_number, players_data[result.offenseCredit].last_name, result.yards);
-            break;
-        case PLAY_PASS:
-            if(result.yards < 0) Terminal::log("Sacked by #%% %% for %% yds",players_data[result.defenseCredit].jersey_number, players_data[result.defenseCredit].last_name, result.yards);
-            else if(result.turnover) Terminal::log("INTERCEPTED!");
-            else if(result.incomplete) Terminal::log("Incomplete pass");
-            else Terminal::log("Pass to #%% %% for %% yds", players_data[result.offenseCredit].jersey_number, players_data[result.offenseCredit].last_name, result.yards);
-            break;
-        case PLAY_PUNT:
-            Terminal::log("Punt by #%% %%, %% yds", players_data[result.offenseCredit].jersey_number, players_data[result.offenseCredit].last_name, result.yards);
-            break;
-        case PLAY_FIELD_GOAL:
-            Terminal::log(result.scoringKick ? "Field goal GOOD" : "Field goal MISSED");
-            break;
-    }
-}
-
-GameState ingameState(){
-    Terminal::log("%% at %%", team_lut[currGame.team2.teamInd], team_lut[currGame.team1.teamInd]);
+//runs a single matchup to completion with no play-by-play pacing/logging,
+//used to resolve every game of a week "at once"
+static void simulateGameFast(int team1, int team2, int* score1, int* score2){
+    buildTeams(team1, team2);
+    initGameSituation(&currSituation);
 
     bool playing = true;
     while(playing){
-        int quarterBefore = currSituation.quarter;
+        playing = stepPlay(&currGame, &currSituation);
+    }
 
-        PlayResult result;
-        playing = stepPlay(&currGame, &currSituation, &result);
-        logPlay(result);
+    *score1 = currGame.team1.score;
+    *score2 = currGame.team2.score;
+}
 
-        if(playing && currSituation.quarter != quarterBefore){
-            Terminal::log("End of quarter %%: %% - %%", quarterBefore, currGame.team1.score, currGame.team2.score);
+GameState ingameState(){
+    while(currSeason.currentWeek < SEASON_WEEKS){
+        WeekSchedule& week = currSeason.weeks[currSeason.currentWeek];
+
+        Terminal::reset();
+        Terminal::log("Week %% Results", currSeason.currentWeek + 1);
+
+        for(int g = 0; g < week.gameCount; g++){
+            int team1 = week.games[g].team1;
+            int team2 = week.games[g].team2;
+
+            int score1, score2;
+            simulateGameFast(team1, team2, &score1, &score2);
+
+            Terminal::log("%% %% - %% %%", team_lut[team1+1], score1, score2, team_lut[team2+1]);
         }
 
-        //pace the sim so plays are readable
-        for(int f = 0; f < 20; f++){
+        if(week.byeTeam1 >= 0){
+            Terminal::log("BYE: %% & %%", team_lut[week.byeTeam1+1], team_lut[week.byeTeam2+1]);
+        }
+
+        Terminal::log("Press Start to continue");
+        while(!key_hit(KEY_START)){
             key_poll();
             VBlankIntrWait();
         }
+        key_poll();
+
+        currSeason.currentWeek++;
     }
 
-    Terminal::log("FINAL %% - %%", currGame.team1.score, currGame.team2.score);
+    Terminal::log("Season complete!");
     Terminal::log("Press Start to continue");
     while(!key_hit(KEY_START)){
         key_poll();
