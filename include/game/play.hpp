@@ -83,7 +83,7 @@ struct PlayResult{
     int defenseCredit; //playerInd of the defender involved (tackle/int), or -1
 };
 
-void buildTeams(int team1, int team2);
+void buildTeams(Game* game, int team1, int team2);
 
 void initGameSituation(GameSituation* situation);
 
@@ -94,8 +94,5 @@ void applyPlayResult(GameSituation* situation, IngameTeam* offenseTeam, IngameTe
 // advances the game by one play, returns false once the game has ended (after Q4)
 // outResult, if non-null, is filled in with the play that was just resolved
 bool stepPlay(Game* game, GameSituation* situation, PlayResult* outResult = nullptr);
-
-extern Game currGame;
-extern GameSituation currSituation;
 
 #endif

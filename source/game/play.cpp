@@ -3,9 +3,6 @@
 #include "pos_lut.hpp"
 #include "players.h"
 
-Game currGame;
-GameSituation currSituation;
-
 static const int QUARTER_LENGTH = 900; //abstract "ticks", not real seconds
 
 typedef int Players::*StatPtr;
@@ -52,9 +49,9 @@ static void findTopPlayers(int teamId, int posId, int count, int* outInds){
     }
 }
 
-void buildTeams(int team1, int team2){
+void buildTeams(Game* game, int team1, int team2){
     int csvIds[2] = { team1 + 1, team2 + 1 };
-    IngameTeam* teams[2] = { &currGame.team1, &currGame.team2 };
+    IngameTeam* teams[2] = { &game->team1, &game->team2 };
 
     for(int t = 0; t < 2; t++){
         int teamId = csvIds[t];
