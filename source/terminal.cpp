@@ -21,6 +21,7 @@ u16 Terminal::text_cbb = 0;
 u8 Terminal::bg_ind = 0;
 font Terminal::text_font(textTiles, textWidths);
 bool Terminal::need_new_line = true;
+bool Terminal::ENABLED = false;
 
 u16 Terminal::initTerminal(){
     u16 dcnt = DCNT_BG1 | DCNT_BG0;

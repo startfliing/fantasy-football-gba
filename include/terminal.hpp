@@ -14,6 +14,7 @@ class Terminal{
         static void eraseLine();
 
         static void log(const char* word){
+            if(!ENABLED) return;
             if(need_new_line){
                 advanceOneLine();
                 need_new_line = false;
@@ -29,6 +30,7 @@ class Terminal{
 
         template <typename T, typename... Args>
         static void log(const char* word, T val, Args... args){
+            if(!ENABLED) return;
             if(need_new_line){
                 advanceOneLine();
                 need_new_line = false;
@@ -75,6 +77,7 @@ class Terminal{
         static u16 text_sbb;
         static u16 text_cbb;
         static font text_font;
+        static bool ENABLED;
 };
 
 #endif
