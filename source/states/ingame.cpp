@@ -38,6 +38,12 @@ static void drawGameScore(Game* game, numTextSE* scores){
     drawNumTextSE(&scores[1], game->team2.score);
 }
 
+static void scroll(int* scrolly, bool byesThisWeek){
+    *scrolly = clamp(*scrolly + key_tri_vert(), 0, 352 - (byesThisWeek ? 32 : 0));
+    REG_BG0VOFS = *scrolly;
+    REG_BG1VOFS = *scrolly;
+}
+
 GameState ingameState(){
 
     SBB_CLEAR(16);
@@ -45,7 +51,8 @@ GameState ingameState(){
     SBB_CLEAR(18);
     SBB_CLEAR(19);
     REG_BG0CNT = BG_BUILD(0, 16, 2, 0, 1, 0, 0); //BG0 text
-    REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 0, 0, 0); 
+    REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 0, 0, 0);
+    REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 3, 0, 0); 
 
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ;
 
@@ -60,12 +67,12 @@ GameState ingameState(){
         for(int c = 0; c < 2; c++){
             x = c * 4;
             scores[r][c] = {x+5, y+1, 16, 0};
-            icons[r][c] = {x + (c*10), y, 18};
+            icons[r][c] = {x + (c*10), y, 16};
         }
     }
 
 
-    int scrollY = 0;
+    int scrollY;
 
     while(currSeason.currentWeek < SEASON_WEEKS){
         WeekSchedule& week = currSeason.weeks[currSeason.currentWeek];
@@ -74,6 +81,15 @@ GameState ingameState(){
         GameSituation situations[SEASON_MAX_GAMES_PER_WEEK];
         bool active[SEASON_MAX_GAMES_PER_WEEK];
 
+        //display Week # while building other SBB
+        SBB_CLEAR(16);
+        SBB_CLEAR(17);
+        SBB_CLEAR(18);
+        SBB_CLEAR(19);
+
+        REG_BG0VOFS = 0;
+        REG_BG1VOFS = 0;
+        scrollY = 0;
 
         for(int g = 0; g < week.gameCount; g++){
             buildTeams(&games[g], week.games[g].team1, week.games[g].team2);
@@ -104,9 +120,7 @@ GameState ingameState(){
             for(int f = 0; f < waitFrames; f++){
                 VBlankIntrWait();
                 key_poll();
-                scrollY = clamp(scrollY + key_tri_vert(), 0, 352);
-                REG_BG0VOFS = scrollY;
-                REG_BG1VOFS = scrollY;
+                scroll(&scrollY, week.byeTeam1 != -1);
                 if(!skipPacing && key_hit(KEY_START)){
                     skipPacing = true;
                     break;
@@ -118,6 +132,7 @@ GameState ingameState(){
         while(!key_hit(KEY_START)){
             key_poll();
             VBlankIntrWait();
+            scroll(&scrollY, week.byeTeam1 != -1);
         }
         key_poll();
 
