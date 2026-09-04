@@ -25,6 +25,7 @@ GameState pregameState(){
     Terminal::reset();
     Terminal::log("18-week season ready!");
     Terminal::log("Press Start to begin!");
+    key_poll();
     while(!key_hit(KEY_START)){
         key_poll();
         VBlankIntrWait();
