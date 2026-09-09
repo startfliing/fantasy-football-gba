@@ -57,7 +57,7 @@ GameState ingameState(){
     REG_DISPCNT = DCNT_MODE0 | DCNT_BG0 | DCNT_BG1 | DCNT_OBJ_1D | DCNT_OBJ;
 
     initNumTextSE();
-    initTeamGraphics();
+    initTeamGraphics(1);
 
     numTextSE scores[16][2];
     teamGraphicSE icons[16][2];
@@ -67,7 +67,7 @@ GameState ingameState(){
         for(int c = 0; c < 2; c++){
             x = c * 4;
             scores[r][c] = {x+5, y+1, 16, 0};
-            icons[r][c] = {x + (c*10), y, 16};
+            icons[r][c] = {x + (c*10), y, 16, 3};
         }
     }
 

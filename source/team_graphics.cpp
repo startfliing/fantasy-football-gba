@@ -84,7 +84,7 @@ const void* teamPalettes[11] = {
     titansPal
 };
 
-void initTeamGraphics(){
+void initTeamGraphics(int cbb){
     int i;
     //load palettes
     for(i = 1; i < 11; i++){
@@ -93,7 +93,7 @@ void initTeamGraphics(){
 
     //load image tiles
     for(i = 0; i < 32; i++){
-        LZ77UnCompVram(graphicPalTeams[i+1].graphics, &tile_mem[1][i*16]);
+        LZ77UnCompVram(graphicPalTeams[i+1].graphics, &tile_mem[cbb][i*16]);
     }
 }
 

@@ -12,11 +12,12 @@ struct teamGraphicSE{
     int x; //tile x
     int y; //tile y
     int sbb; //sbb
+    int cbb;
 };
 
 extern graphicPal graphicPalTeams[33];
 
-void initTeamGraphics();
+void initTeamGraphics(int cbb);
 
 void drawTeamGraphic(teamGraphicSE* tgse, int teamind);
 
