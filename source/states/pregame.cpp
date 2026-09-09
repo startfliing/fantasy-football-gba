@@ -112,7 +112,7 @@ GameState pregameState(){
     int y, x;
     for(int i = 0; i < SEASON_MAX_GAMES_PER_WEEK; i++){
         int yStartInd = ((i & 7) * 4) + 8;
-        int xStartInd = i & 8 ? 2 : 16;
+        int xStartInd = i & 8 ? 16 : 2;
         icons[i*2] = {xStartInd, yStartInd, 19};
         icons[(i*2)+1] = {xStartInd + 8, yStartInd, 19};
     }
