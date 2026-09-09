@@ -14,7 +14,7 @@ void generateSeasonSchedule(Season* season){
     }
 
     //pair up the shuffled teams and give each pair a distinct week off
-    //(weeks 1..SEASON_TEAMS/2, leaving the first and last week full)
+    //(weeks 1..SEASON_MAX_GAMES_PER_WEEK, leaving the first and last week full)
     int byeWeek[SEASON_TEAMS];
     for(int t = 0; t < SEASON_TEAMS; t++) byeWeek[t] = -1;
     for(int k = 0; k < SEASON_MAX_GAMES_PER_WEEK; k++){
@@ -23,58 +23,91 @@ void generateSeasonSchedule(Season* season){
         byeWeek[order[2*k + 1]] = wk;
     }
 
+    //tracks which teams have already faced each other this season, so week
+    //pairings can avoid repeat matchups
+    bool played[SEASON_TEAMS][SEASON_TEAMS];
+    for(int a = 0; a < SEASON_TEAMS; a++)
+        for(int b = 0; b < SEASON_TEAMS; b++)
+            played[a][b] = false;
+
     season->currentWeek = 0;
 
     for(int wk = 0; wk < SEASON_WEEKS; wk++){
         WeekSchedule& week = season->weeks[wk];
         week.gameCount = 0;
+        week.byeTeam1 = -1;
+        week.byeTeam2 = -1;
 
-        //circle method: keep order[0] fixed, rotate the rest by `wk` steps to
-        //get a fresh, non-repeating set of pairings each week
-        int rotated[SEASON_TEAMS];
-        rotated[0] = order[0];
-        for(int i = 1; i < SEASON_TEAMS; i++){
-            rotated[i] = order[1 + ((i - 1 + wk) % (SEASON_TEAMS - 1))];
-        }
-
-        int orphan[2];
-        int orphanCount = 0;
-        int byeTeams[2] = {-1, -1};
-        int byeCount = 0;
-
-        for(int i = 0; i < SEASON_TEAMS / 2; i++){
-            int t1 = rotated[i];
-            int t2 = rotated[SEASON_TEAMS - 1 - i];
-
-            bool byeT1 = (byeWeek[t1] == wk);
-            bool byeT2 = (byeWeek[t2] == wk);
-
-            //track bye teams by arrival order, not by which pairing slot they
-            //landed in, since both can end up as t1 (or both as t2)
-            if(byeT1) byeTeams[byeCount++] = t1;
-            if(byeT2) byeTeams[byeCount++] = t2;
-
-            if(byeT1 && byeT2){
-                //nothing to do, both scheduled teams are resting this week
-            }else if(byeT1){
-                orphan[orphanCount++] = t2;
-            }else if(byeT2){
-                orphan[orphanCount++] = t1;
+        int active[SEASON_TEAMS];
+        int activeCount = 0;
+        for(int t = 0; t < SEASON_TEAMS; t++){
+            if(byeWeek[t] == wk){
+                if(week.byeTeam1 < 0) week.byeTeam1 = t;
+                else week.byeTeam2 = t;
             }else{
-                WeekMatchup& matchup = week.games[week.gameCount++];
-                matchup.team1 = t1;
-                matchup.team2 = t2;
+                active[activeCount++] = t;
             }
         }
 
-        week.byeTeam1 = byeTeams[0];
-        week.byeTeam2 = byeTeams[1];
+        //try a handful of shuffles and keep whichever pairing has the fewest
+        //repeat matchups; this reliably finds a fully repeat-free pairing
+        WeekMatchup bestGames[SEASON_MAX_GAMES_PER_WEEK];
+        int bestGameCount = 0;
+        int bestRepeats = 1 << 30;
 
-        //the two teams whose scheduled opponent got a bye instead play each other
-        if(orphanCount == 2){
-            WeekMatchup& matchup = week.games[week.gameCount++];
-            matchup.team1 = orphan[0];
-            matchup.team2 = orphan[1];
+        for(int attempt = 0; attempt < 30 && bestRepeats > 0; attempt++){
+            int cand[SEASON_TEAMS];
+            for(int t = 0; t < activeCount; t++) cand[t] = active[t];
+            for(int i = activeCount - 1; i > 0; i--){
+                int j = qran() % (i + 1);
+                int tmp = cand[i]; cand[i] = cand[j]; cand[j] = tmp;
+            }
+
+            bool used[SEASON_TEAMS];
+            for(int t = 0; t < SEASON_TEAMS; t++) used[t] = false;
+
+            WeekMatchup games[SEASON_MAX_GAMES_PER_WEEK];
+            int gameCount = 0;
+            int repeats = 0;
+
+            for(int i = 0; i < activeCount; i++){
+                int t1 = cand[i];
+                if(used[t1]) continue;
+
+                int t2 = -1;
+                for(int j = i + 1; j < activeCount; j++){
+                    if(used[cand[j]] || played[t1][cand[j]]) continue;
+                    t2 = cand[j];
+                    break;
+                }
+                //fallback: everyone left has already played t1 this season
+                if(t2 < 0){
+                    for(int j = i + 1; j < activeCount; j++){
+                        if(!used[cand[j]]){ t2 = cand[j]; break; }
+                    }
+                    repeats++;
+                }
+
+                used[t1] = true;
+                used[t2] = true;
+                games[gameCount].team1 = t1;
+                games[gameCount].team2 = t2;
+                gameCount++;
+            }
+
+            if(repeats < bestRepeats){
+                bestRepeats = repeats;
+                bestGameCount = gameCount;
+                for(int g = 0; g < gameCount; g++) bestGames[g] = games[g];
+            }
+        }
+
+        for(int g = 0; g < bestGameCount; g++){
+            int t1 = bestGames[g].team1;
+            int t2 = bestGames[g].team2;
+            played[t1][t2] = true;
+            played[t2][t1] = true;
+            week.games[week.gameCount++] = bestGames[g];
         }
     }
 }
