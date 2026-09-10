@@ -5,6 +5,7 @@
 #include "terminal.hpp"
 #include "ingame.hpp"
 #include "save.hpp"
+#include "playerView.hpp"
 
 #include "team_lut.hpp"
 #include "play.hpp"
@@ -35,22 +36,17 @@ void buildWeek(int week){
 void loadPregameGraphics(){
     LZ77UnCompVram(vsTiles, &tile_mem[0][25]);
     LZ77UnCompVram(headerTiles, &tile_mem[0][31]);
-    LZ77UnCompVram(seasonBGTiles, &tile_mem[0][87]);
-    LZ77UnCompVram(seasonBGPal, &pal_bg_bank[11]);
 }
 
-void drawBG(bool isSeasonView){
-    if(isSeasonView){
-        LZ77UnCompVram(seasonBGMap, se_mem[17]);
-        for(int i = 0; i < 32*64; i++){
-            se_mem[17][i] |= SE_PALBANK(11);
-        }
-        //update pal
-        pal_bg_bank[11][1] = RGB15(28,28,28);
-        pal_bg_bank[11][2] = RGB15(6,6,6);
-    }else{ //player view
-
+void drawBG(){
+    LZ77UnCompVram(seasonBGTiles, &tile_mem[0][87]);
+    LZ77UnCompVram(seasonBGMap, se_mem[17]);
+    for(int i = 0; i < 32*64; i++){
+        se_mem[17][i] |= SE_PALBANK(11);
     }
+    //update pal
+    pal_bg_bank[11][1] = RGB15(28,28,28);
+    pal_bg_bank[11][2] = RGB15(6,6,6);
 }
 
 void drawVersusText(teamGraphicSE* icon){
@@ -77,6 +73,10 @@ void drawWeeklyMatchups(int week, teamGraphicSE* icons, numTextSE* weekNum){
     }
 }
 
+static int currWeek = 0;
+static bool isPregameLoaded = false;
+static int vofs = 0;
+
 // Pregame state implementation
 GameState pregameState(){
 
@@ -85,28 +85,39 @@ GameState pregameState(){
         DCNT_BG1 |  //seasonBG / playerBG
         DCNT_BG2;   //Team logos + vs + weeknumber
 
-    REG_BG0CNT = BG_BUILD(0, 16, 0, 0, 0, 0, 0); SBB_CLEAR(16);
-    REG_BG1CNT = BG_BUILD(0, 17, 2, 0, 2, 0, 0); SBB_CLEAR(17); SBB_CLEAR(18);
-    REG_BG2CNT = BG_BUILD(0, 19, 2, 0, 1, 0, 0); SBB_CLEAR(19); SBB_CLEAR(20);
+    REG_BG0CNT = BG_BUILD(0, 16, 0, 0, 0, 0, 0); 
+    REG_BG1CNT = BG_BUILD(0, 17, 2, 0, 3, 0, 0); 
+    REG_BG2CNT = BG_BUILD(0, 19, 2, 0, 2, 0, 0); 
     
-    REG_BG0VOFS = 4;
-    REG_BG1VOFS = 0;
-    REG_BG2VOFS = 0;
+    if(!isPregameLoaded){
+        SBB_CLEAR(16);
+        SBB_CLEAR(17); SBB_CLEAR(18);
+        SBB_CLEAR(19); SBB_CLEAR(20);
+        generateSeasonSchedule(&currSeason);
+        
 
-    initNumTextSE();
-    initTeamGraphics(1);
-    
+        isPregameLoaded = true;
+        initNumTextSE();
+        initTeamGraphics(1);
+        LZ77UnCompVram(seasonBGPal, &pal_bg_bank[11]);
+    }
+
+    drawBG();
     loadPregameGraphics();
-    drawBG(true);
+    
+
     LZ77UnCompVram(headerMap, se_mem[16]);
     for(int i = 0; i < 32*32; i++){
         se_mem[16][i] |= SE_PALBANK(11);
     }
 
+    REG_BG0VOFS = 4;
+    REG_BG1VOFS = vofs;
+    REG_BG2VOFS = vofs;
+    REG_BG3VOFS = 0;
+
     saveData* sd = getSaveData();
     int currSeed = sqran(sd->currSeed);
-
-    generateSeasonSchedule(&currSeason);
 
     teamGraphicSE icons[32];
     int y, x;
@@ -120,12 +131,10 @@ GameState pregameState(){
     PREGAME_PAGE currPage = PREGAME_PAGE::PLAYERS;
     numTextSE weekNum = {16,4,19};
 
-    drawWeeklyMatchups(0, icons, &weekNum);
-
+    drawWeeklyMatchups(currWeek, icons, &weekNum);
 
     key_poll();
-    int vofs = 0;
-    int currWeek = 0;
+
     while(!key_hit(KEY_START)){
 
         if(key_hit(KEY_LEFT) || key_hit(KEY_RIGHT)){
@@ -136,6 +145,10 @@ GameState pregameState(){
         vofs = clamp(vofs + key_tri_vert()*2, 0, 176);
         REG_BG1VOFS = vofs;
         REG_BG2VOFS = vofs;
+
+        if(key_hit(KEY_R)){
+            return (GameState)&playerViewState;
+        }
 
 
         key_poll();
