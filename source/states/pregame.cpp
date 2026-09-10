@@ -84,16 +84,15 @@ GameState pregameState(){
         initNumTextSE();
         initTeamGraphics(1);
         LZ77UnCompVram(seasonBGPal, &pal_bg_bank[11]);
+
+        LZ77UnCompVram(headerMap, se_mem[16]);
+        for(int i = 0; i < 32*32; i++){
+            se_mem[16][i] |= SE_PALBANK(11);
+        }
     }
 
     drawBG();
     loadPregameGraphics();
-    
-
-    LZ77UnCompVram(headerMap, se_mem[16]);
-    for(int i = 0; i < 32*32; i++){
-        se_mem[16][i] |= SE_PALBANK(11);
-    }
 
     REG_BG0VOFS = 4;
     REG_BG1VOFS = vofs;
