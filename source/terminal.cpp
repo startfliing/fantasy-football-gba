@@ -2,15 +2,14 @@
 
 #include "text.h"
 #include "textWidths.hpp"
-#include "image.h"
 
 #define IS_TEXT_SCROLL_ENABLED false
 
-#define TERMINAL_TEXT_WIDTH 28
-#define TERMINAL_TEXT_HEIGHT 18
+#define TERMINAL_TEXT_WIDTH 26
+#define TERMINAL_TEXT_HEIGHT 13
 
-#define TERMINAL_TOP_ROW 1
-#define TERMINAL_LEFT_COL 1
+#define TERMINAL_TOP_ROW 5
+#define TERMINAL_LEFT_COL 2
 
 //static class stuff
 u16 Terminal::curr_line_num = 0;
@@ -21,38 +20,38 @@ u16 Terminal::text_cbb = 0;
 u8 Terminal::bg_ind = 0;
 font Terminal::text_font(textTiles, textWidths);
 bool Terminal::need_new_line = true;
-bool Terminal::ENABLED = false;
+bool Terminal::ENABLED = true;
 
 u16 Terminal::initTerminal(){
-    u16 dcnt = DCNT_BG1 | DCNT_BG0;
-    u8 cbb = 0;
-    u8 sbb = 16;
-    REG_BG0CNT = BG_BUILD(cbb, sbb, 0, 0, 1, 0, 0);
+
+    u8 cbb = 2;
+    u8 sbb = 21;
+    //REG_BG0CNT = BG_BUILD(cbb, sbb, 0, 0, 1, 0, 0);
 
     //load palette
-    memcpy16(pal_bg_mem, imagePal, imagePalLen/2);
+    //memcpy16(pal_bg_mem, imagePal, imagePalLen/2);
 
     //load tiles
-    LZ77UnCompVram(imageTiles, tile_mem[cbb]);
+    //LZ77UnCompVram(imageTiles, tile_mem[cbb]);
     
     //load image
-    memcpy16(&se_mem[sbb], imageMap, imageMapLen/2);
+    //memcpy16(&se_mem[sbb], imageMap, imageMapLen/2);
 
-    REG_BG1CNT = Terminal::setCNT(1, sbb+1, cbb+1);
+    REG_BG3CNT = Terminal::setCNT(3, sbb, 2);
 
-    return dcnt;
+    return 0;
 }
 
 //set control flags for bg
 u16 Terminal::setCNT(u8 bg, u16 cbb, u16 sbb){
     bg_ind = clamp(bg, 0, 4);
-    text_sbb = sbb;
-    text_cbb = cbb;
+    text_sbb = 21;
+    text_cbb = 3;
 
     reset();
     
     //These could be added to the function parameters if you call for it
-    return BG_BUILD(cbb,sbb,0,0,0,0,1);
+    return BG_BUILD(3,21,0,0,1,0,1);
 }
 
 // reset line, clear the whole screen, and reset offset
@@ -194,7 +193,7 @@ void Terminal::updateScreen(){
     for(int i = 0; i < TERMINAL_TEXT_HEIGHT; i++){
         for(int j = 0; j < TERMINAL_TEXT_WIDTH; j++){
             //draw onto screen by iterating through VRAM and screen data at the same time
-            se_mem[text_sbb][(TERMINAL_TOP_ROW*32)+TERMINAL_LEFT_COL+(i*32)+j] = (temp_line*TERMINAL_TEXT_WIDTH)+j+1;
+            se_mem[text_sbb][(TERMINAL_TOP_ROW*32)+TERMINAL_LEFT_COL+(i*32)+j] = (temp_line*TERMINAL_TEXT_WIDTH)+j+1 | SE_PALBANK(11);
         }
         temp_line = (temp_line+1)%TERMINAL_TEXT_HEIGHT;
     }

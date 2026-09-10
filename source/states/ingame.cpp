@@ -16,22 +16,6 @@
 //so the player can watch every game of the week tick along together
 static const int ROUND_PACE_FRAMES = 20;
 
-//redraws the scoreboard with each game's current (possibly in-progress) score
-static void drawWeekScores(WeekSchedule& week, Game* games, numTextSE* scores){
-    Terminal::reset();
-    Terminal::log("Week %% Results", currSeason.currentWeek + 1);
-
-    for(int g = 0; g < week.gameCount; g++){
-        int team1 = week.games[g].team1;
-        int team2 = week.games[g].team2;
-        
-        //Terminal::log("%% %% - %% %%", team_lut[team1+1], games[g].team1.score, games[g].team2.score, team_lut[team2+1]);
-    }
-
-    if(week.byeTeam1 >= 0){
-        Terminal::log("BYE: %% & %%", team_lut[week.byeTeam1+1], team_lut[week.byeTeam2+1]);
-    }
-}
 
 static void drawGameScore(Game* game, numTextSE* scores){
     drawNumTextSE(&scores[0], game->team1.score);
@@ -128,7 +112,7 @@ GameState ingameState(){
             }
         }
 
-        Terminal::log("Press Start to continue");
+        //Terminal::log("Press Start to continue");
         while(!key_hit(KEY_START)){
             key_poll();
             VBlankIntrWait();
@@ -139,8 +123,8 @@ GameState ingameState(){
         currSeason.currentWeek++;
     }
 
-    Terminal::log("Season complete!");
-    Terminal::log("Press Start to continue");
+    //Terminal::log("Season complete!");
+    //Terminal::log("Press Start to continue");
     while(!key_hit(KEY_START)){
         key_poll();
         VBlankIntrWait();
