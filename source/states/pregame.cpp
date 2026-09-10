@@ -17,22 +17,6 @@
 #include "header.h"
 #include "seasonBG.h"
 
-TILE vsIcon[4];
-
-enum PREGAME_PAGE{
-    SEASON,
-    PLAYERS
-};
-
-void buildWeek(int week){
-    for(int i = 0; i < currSeason.weeks[week].gameCount; i++){
-        int yStartInd = ((i & 7) * 4) + 7;
-        int xStartInd = i & 8 ? 2 : 16;
-        //printTeam1(xStartInd, yStartInd);
-        //printTeam2(yStartInd+8, yStartInd);
-    }
-}
-
 void loadPregameGraphics(){
     LZ77UnCompVram(vsTiles, &tile_mem[0][25]);
     LZ77UnCompVram(headerTiles, &tile_mem[0][31]);
@@ -122,13 +106,12 @@ GameState pregameState(){
     teamGraphicSE icons[32];
     int y, x;
     for(int i = 0; i < SEASON_MAX_GAMES_PER_WEEK; i++){
-        int yStartInd = ((i & 7) * 4) + 8;
-        int xStartInd = i & 8 ? 16 : 2;
-        icons[i*2] = {xStartInd, yStartInd, 19};
-        icons[(i*2)+1] = {xStartInd + 8, yStartInd, 19};
+        y = ((i & 7) * 4) + 8;
+        x = i & 8 ? 16 : 2;
+        icons[i*2] = {x, y, 19};
+        icons[(i*2)+1] = {x + 8, y, 19};
     }
 
-    PREGAME_PAGE currPage = PREGAME_PAGE::PLAYERS;
     numTextSE weekNum = {16,4,19};
 
     drawWeeklyMatchups(currWeek, icons, &weekNum);
