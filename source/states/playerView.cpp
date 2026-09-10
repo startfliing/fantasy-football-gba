@@ -34,10 +34,88 @@ void drawPlayer(){
     if(currPlayer.team >= 5) playerInd--;
     Players currPlayerData = players_data[playerInd];
     Terminal::reset();
+    VBlankIntrDelay(10);
+    
     Terminal::log("%%", team_lut[currPlayerData.team_id]);
     Terminal::log("#%% %% %%", currPlayerData.jersey_number, currPlayerData.first_name, currPlayerData.last_name);
     Terminal::log(" ");
     Terminal::log("%% ", fullPositions[currPlayerData.pos_id]);
+    Terminal::log(" ");
+    Terminal::log("Overall Rating: %%", currPlayerData.overall_rating);
+    Terminal::log(" ");
+    Terminal::log("Stats:");
+    switch(currPlayerData.pos_id){
+        
+        case 2: //POS_CB
+        case 5: //POS_S
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Tackle: %%", currPlayerData.tackle);
+            Terminal::log("Catching: %%", currPlayerData.catching);
+            Terminal::log("Kick Return: %%", currPlayerData.kickReturn);
+            Terminal::log("Coverage: %%", currPlayerData.coverage);
+            break;
+
+        case 19: //POS_TE
+        case 20: //POS_WR
+        case 4: //POS_RB
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Carrying: %%", currPlayerData.carrying);
+            Terminal::log("Catching: %%", currPlayerData.catching);
+            Terminal::log("Kick Return: %%", currPlayerData.kickReturn);
+            Terminal::log("Juke Move: %%", currPlayerData.jukeMove);
+            break;
+        case 6: //POS_K
+        case 13: //POS_P
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Strength: %%", currPlayerData.strength);
+            Terminal::log("Toughness: %%", currPlayerData.toughness);
+            Terminal::log("Kick Accuracy: %%", currPlayerData.kickAccuracy);
+            Terminal::log("Throw Accuracy: %%", currPlayerData.throwAccuracy);
+            break;
+        case 1: //POS_C
+        case 10: //POS_LS
+        case 8: //POS_LG
+        case 11: //POS_LT
+        case 16: //POS_RG
+        case 18: //POS_RT
+        case 7: //POS_LE
+        case 15: //POS_RE
+        case 3: //POS_DT
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Strength: %%", currPlayerData.strength);
+            Terminal::log("Toughness: %%", currPlayerData.toughness);
+            Terminal::log("Block: %%", currPlayerData.block);
+            Terminal::log("Tackle: %%", currPlayerData.tackle);
+            break;
+
+        
+        case 9: //POS_LOLB
+        case 17: //POS_ROLB
+        case 12: //POS_MLB
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Strength: %%", currPlayerData.strength);
+            Terminal::log("Toughness: %%", currPlayerData.toughness);
+            Terminal::log("Tackle: %%", currPlayerData.tackle);
+            Terminal::log("Coverage: %%", currPlayerData.coverage);
+            break;
+        
+        case 14: //POS_QB
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Strength: %%", currPlayerData.strength);
+            Terminal::log("Toughness: %%", currPlayerData.toughness);
+            Terminal::log("Throw Accuracy: %%", currPlayerData.throwAccuracy);
+            Terminal::log("Carrying: %%", currPlayerData.carrying);
+            break;
+        
+        case 0: //POS_NA
+        default:
+            Terminal::log("Speed: %%", currPlayerData.speed);
+            Terminal::log("Strength: %%", currPlayerData.strength);
+            Terminal::log("Toughness: %%", currPlayerData.toughness);
+            Terminal::log("undefined");
+            Terminal::log("undefined");
+            break;
+    }
 }
 
 void updateTeamGraphic(){
