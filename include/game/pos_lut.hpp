@@ -3,6 +3,8 @@
 
 extern const char* positions[21];
 
+extern const char* fullPositions[21];
+
 // Indices into positions[], matches pos_id in players.csv/players_data
 enum PosId{
     POS_NA   = 0,
