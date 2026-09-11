@@ -1,9 +1,8 @@
 #include "save.hpp"
 #include "tonc.h"
 
-
-static saveData g_saveData;
-static bool g_saveDataLoaded = false;
+saveData g_saveData;
+bool g_saveDataLoaded = false;
 
 void sramCpy(u8* src, u8* dst){
     for(size_t i = 0; i < sizeof(saveData); i++){
@@ -25,8 +24,4 @@ void load(){
 
     sramCpy(cpySrc, cpyDst);
     g_saveDataLoaded = true;
-}
-
-saveData* getSaveData(){
-    return &g_saveData;
 }

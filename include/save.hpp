@@ -3,10 +3,12 @@
 
 #include "tonc.h"
 
-
 struct saveData{
     int currSeed;
 } __attribute__((packed));
+
+extern saveData g_saveData;
+extern bool g_saveDataLoaded;
 
 void save();
 

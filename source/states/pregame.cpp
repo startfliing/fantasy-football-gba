@@ -72,6 +72,9 @@ GameState pregameState(){
     REG_BG0CNT = BG_BUILD(0, 16, 0, 0, 0, 0, 0); 
     REG_BG1CNT = BG_BUILD(0, 17, 2, 0, 3, 0, 0); 
     REG_BG2CNT = BG_BUILD(0, 19, 2, 0, 2, 0, 0); 
+
+    saveData* sd = &g_saveData;
+    sqran(sd->currSeed);
     
     if(!isPregameLoaded){
         SBB_CLEAR(16);
@@ -98,9 +101,6 @@ GameState pregameState(){
     REG_BG1VOFS = vofs;
     REG_BG2VOFS = vofs;
     REG_BG3VOFS = 0;
-
-    saveData* sd = getSaveData();
-    int currSeed = sqran(sd->currSeed);
 
     teamGraphicSE icons[32];
     int y, x;
