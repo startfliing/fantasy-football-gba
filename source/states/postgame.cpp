@@ -2,22 +2,28 @@
 
 //exit states: pregame, title??
 #include "postgame.hpp"
+#include "ingame.hpp"
+#include "seasonEnd.hpp"
+
 #include "terminal.hpp"
-#include "pregame.hpp"
 #include "save.hpp"
+
+#include "play.hpp"
+#include "season.hpp"
 
 GameState postgameState(){
 
-    saveData* sd = getSaveData();
-    Terminal::log("You pressed A %% times!", sd->currSeed);
+    Terminal::log("End of Week %%!", currSeason.currentWeek);
 
-    while(!key_hit(KEY_B)){
+    while(!key_hit(KEY_START)){
         key_poll();
         VBlankIntrWait();
     }
     key_poll();
     
-    // For now, loop back to itself
-    // Later you can transition to other states like: mainMenuState, playState, etc.
-    return (GameState)&pregameState;
+    if(currSeason.currentWeek >= SEASON_WEEKS){
+        return (GameState)&seasonEndState;
+    }
+
+    return (GameState)&ingameState;
 }

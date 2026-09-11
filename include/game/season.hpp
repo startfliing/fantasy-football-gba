@@ -9,6 +9,15 @@
 struct WeekMatchup{
     int team1;
     int team2;
+    int team1Score;
+    int team2Score;
+};
+
+struct TeamSeasonRecord{
+    int wins;
+    int losses;
+    int pointsFor;
+    int pointsAgainst;
 };
 
 struct WeekSchedule{
@@ -21,11 +30,13 @@ struct WeekSchedule{
 struct Season{
     int currentWeek; // 0-based, 0..SEASON_WEEKS-1
     WeekSchedule weeks[SEASON_WEEKS];
+    TeamSeasonRecord teamRecords[SEASON_TEAMS];
 };
 
 // builds a fresh 18-week schedule: every team plays 17 games and gets exactly
 // one week off, with matchups shuffled (via qran()) for variety between seasons
 void generateSeasonSchedule(Season* season);
+void recordWeekResult(Season* season, int weekIndex, int gameIndex, int team1Score, int team2Score);
 
 extern Season currSeason;
 

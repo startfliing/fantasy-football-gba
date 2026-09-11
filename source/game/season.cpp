@@ -31,6 +31,9 @@ void generateSeasonSchedule(Season* season){
             played[a][b] = false;
 
     season->currentWeek = 0;
+    for(int t = 0; t < SEASON_TEAMS; t++){
+        season->teamRecords[t] = {0, 0, 0, 0};
+    }
 
     for(int wk = 0; wk < SEASON_WEEKS; wk++){
         WeekSchedule& week = season->weeks[wk];
@@ -107,7 +110,33 @@ void generateSeasonSchedule(Season* season){
             int t2 = bestGames[g].team2;
             played[t1][t2] = true;
             played[t2][t1] = true;
-            week.games[week.gameCount++] = bestGames[g];
+            WeekMatchup& matchup = week.games[week.gameCount++];
+            matchup = bestGames[g];
+            matchup.team1Score = -1;
+            matchup.team2Score = -1;
         }
+    }
+}
+
+void recordWeekResult(Season* season, int weekIndex, int gameIndex, int team1Score, int team2Score){
+    WeekMatchup& matchup = season->weeks[weekIndex].games[gameIndex];
+    if(matchup.team1Score >= 0) return;
+
+    matchup.team1Score = team1Score;
+    matchup.team2Score = team2Score;
+
+    TeamSeasonRecord& team1Record = season->teamRecords[matchup.team1];
+    TeamSeasonRecord& team2Record = season->teamRecords[matchup.team2];
+    team1Record.pointsFor += team1Score;
+    team1Record.pointsAgainst += team2Score;
+    team2Record.pointsFor += team2Score;
+    team2Record.pointsAgainst += team1Score;
+
+    if(team1Score > team2Score){
+        team1Record.wins++;
+        team2Record.losses++;
+    }else if(team2Score > team1Score){
+        team2Record.wins++;
+        team1Record.losses++;
     }
 }

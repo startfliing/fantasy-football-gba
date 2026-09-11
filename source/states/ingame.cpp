@@ -58,78 +58,71 @@ GameState ingameState(){
 
     int scrollY;
 
-    while(currSeason.currentWeek < SEASON_WEEKS){
-        WeekSchedule& week = currSeason.weeks[currSeason.currentWeek];
+    WeekSchedule& week = currSeason.weeks[currSeason.currentWeek];
 
-        Game games[SEASON_MAX_GAMES_PER_WEEK];
-        GameSituation situations[SEASON_MAX_GAMES_PER_WEEK];
-        bool active[SEASON_MAX_GAMES_PER_WEEK];
+    Game games[SEASON_MAX_GAMES_PER_WEEK];
+    GameSituation situations[SEASON_MAX_GAMES_PER_WEEK];
+    bool active[SEASON_MAX_GAMES_PER_WEEK];
 
-        //display Week # while building other SBB
-        SBB_CLEAR(16);
-        SBB_CLEAR(17);
-        SBB_CLEAR(18);
-        SBB_CLEAR(19);
+    //display Week # while building other SBB
+    SBB_CLEAR(16);
+    SBB_CLEAR(17);
+    SBB_CLEAR(18);
+    SBB_CLEAR(19);
 
-        REG_BG0VOFS = 0;
-        REG_BG1VOFS = 0;
-        scrollY = 0;
+    REG_BG0VOFS = 0;
+    REG_BG1VOFS = 0;
+    scrollY = 0;
 
-        for(int g = 0; g < week.gameCount; g++){
-            buildTeams(&games[g], week.games[g].team1, week.games[g].team2);
-            initGameSituation(&situations[g]);
-            drawGameScore(&games[g], scores[g]);
-            drawTeamGraphic(&icons[g][0], games[g].team1.teamInd);
-            drawTeamGraphic(&icons[g][1], games[g].team2.teamInd);
-            active[g] = true;
-        }
-
-        //steps every game of the week forward one play at a time in lockstep,
-        //redrawing the scoreboard after each round, until all games are final
-        bool skipPacing = false;
-        bool anyActive = true;
-        while(anyActive){
-            anyActive = false;
-            for(int g = 0; g < week.gameCount; g++){
-                if(!active[g]) continue;
-                if(stepPlay(&games[g], &situations[g])){
-                    drawGameScore(&games[g], scores[g]);
-                    anyActive = true;
-                }else{
-                    active[g] = false;
-                }
-            }
-
-            int waitFrames = skipPacing ? 1 : ROUND_PACE_FRAMES;
-            for(int f = 0; f < waitFrames; f++){
-                VBlankIntrWait();
-                key_poll();
-                scroll(&scrollY, week.byeTeam1 != -1);
-                if(!skipPacing && key_hit(KEY_START)){
-                    skipPacing = true;
-                    break;
-                }
-            }
-        }
-
-        //Terminal::log("Press Start to continue");
-        while(!key_hit(KEY_START)){
-            key_poll();
-            VBlankIntrWait();
-            scroll(&scrollY, week.byeTeam1 != -1);
-        }
-        key_poll();
-
-        currSeason.currentWeek++;
+    for(int g = 0; g < week.gameCount; g++){
+        buildTeams(&games[g], week.games[g].team1, week.games[g].team2);
+        initGameSituation(&situations[g]);
+        drawGameScore(&games[g], scores[g]);
+        drawTeamGraphic(&icons[g][0], games[g].team1.teamInd);
+        drawTeamGraphic(&icons[g][1], games[g].team2.teamInd);
+        active[g] = true;
     }
 
-    //Terminal::log("Season complete!");
+    //steps every game of the week forward one play at a time in lockstep,
+    //redrawing the scoreboard after each round, until all games are final
+    bool skipPacing = false;
+    bool anyActive = true;
+    while(anyActive){
+        anyActive = false;
+        for(int g = 0; g < week.gameCount; g++){
+            if(!active[g]) continue;
+            if(stepPlay(&games[g], &situations[g])){
+                drawGameScore(&games[g], scores[g]);
+                anyActive = true;
+            }else{
+                active[g] = false;
+            }
+        }
+
+        int waitFrames = skipPacing ? 1 : ROUND_PACE_FRAMES;
+        for(int f = 0; f < waitFrames; f++){
+            VBlankIntrWait();
+            key_poll();
+            scroll(&scrollY, week.byeTeam1 != -1);
+            if(!skipPacing && key_hit(KEY_START)){
+                skipPacing = true;
+                break;
+            }
+        }
+    }
+
     //Terminal::log("Press Start to continue");
     while(!key_hit(KEY_START)){
         key_poll();
         VBlankIntrWait();
+        scroll(&scrollY, week.byeTeam1 != -1);
     }
     key_poll();
+
+    for(int g = 0; g < week.gameCount; g++){
+        recordWeekResult(&currSeason, currSeason.currentWeek, g, games[g].team1.score, games[g].team2.score);
+    }
+    currSeason.currentWeek++;
 
     return (GameState)&postgameState;
 }
