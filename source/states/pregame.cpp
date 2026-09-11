@@ -83,6 +83,7 @@ GameState pregameState(){
         isPregameLoaded = true;
         initNumTextSE();
         initTeamGraphics(1);
+        loadPregameGraphics();
         LZ77UnCompVram(seasonBGPal, &pal_bg_bank[11]);
 
         LZ77UnCompVram(headerMap, se_mem[16]);
@@ -92,7 +93,6 @@ GameState pregameState(){
     }
 
     drawBG();
-    loadPregameGraphics();
 
     REG_BG0VOFS = 4;
     REG_BG1VOFS = vofs;
