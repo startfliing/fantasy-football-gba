@@ -5,11 +5,11 @@
 
 #define IS_TEXT_SCROLL_ENABLED false
 
-#define TERMINAL_TEXT_WIDTH 26
-#define TERMINAL_TEXT_HEIGHT 13
+#define TERMINAL_TEXT_WIDTH 21
+#define TERMINAL_TEXT_HEIGHT 12
 
-#define TERMINAL_TOP_ROW 5
-#define TERMINAL_LEFT_COL 2
+#define TERMINAL_LEFT_COL 7
+#define TERMINAL_TOP_ROW 6
 
 //static class stuff
 u16 Terminal::curr_line_num = 0;

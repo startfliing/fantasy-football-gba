@@ -23,7 +23,7 @@ void loadPregameGraphics(){
 }
 
 void drawBG(){
-    LZ77UnCompVram(seasonBGTiles, &tile_mem[0][87]);
+    LZ77UnCompVram(seasonBGTiles, &tile_mem[0][124]);
     LZ77UnCompVram(seasonBGMap, se_mem[17]);
     for(int i = 0; i < 32*64; i++){
         se_mem[17][i] |= SE_PALBANK(11);
@@ -105,13 +105,13 @@ GameState pregameState(){
     teamGraphicSE icons[32];
     int y, x;
     for(int i = 0; i < SEASON_MAX_GAMES_PER_WEEK; i++){
-        y = ((i & 7) * 4) + 8;
+        y = ((i & 7) * 4) + 10;
         x = i & 8 ? 16 : 2;
         icons[i*2] = {x, y, 19};
         icons[(i*2)+1] = {x + 8, y, 19};
     }
 
-    numTextSE weekNum = {16,4,19};
+    numTextSE weekNum = {16,6,19};
 
     drawWeeklyMatchups(currWeek, icons, &weekNum);
 
@@ -124,7 +124,7 @@ GameState pregameState(){
             drawWeeklyMatchups(currWeek, icons, &weekNum);
         }
 
-        vofs = clamp(vofs + key_tri_vert()*2, 0, 176);
+        vofs = clamp(vofs + key_tri_vert()*2, 0, 192);
         REG_BG1VOFS = vofs;
         REG_BG2VOFS = vofs;
 

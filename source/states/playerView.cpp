@@ -11,7 +11,7 @@
 #include "playerViewer.h"
 
 void drawPlayerView(){
-    LZ77UnCompVram(playerViewerTiles, &tile_mem[0][87]);
+    LZ77UnCompVram(playerViewerTiles, &tile_mem[0][124]);
     LZ77UnCompVram(playerViewerMap, se_mem[17]);
     for(int i = 0; i < 32*32; i++){
         se_mem[17][i] |= SE_PALBANK(11);
@@ -38,8 +38,8 @@ void drawPlayer(){
     
     Terminal::log("%%", team_lut[currPlayerData.team_id]);
     Terminal::log("#%% %% %%", currPlayerData.jersey_number, currPlayerData.first_name, currPlayerData.last_name);
-    Terminal::log(" ");
     Terminal::log("%% ", fullPositions[currPlayerData.pos_id]);
+    Terminal::log(" ");
     Terminal::log(" ");
     Terminal::log("Overall Rating: %%", currPlayerData.overall_rating);
     Terminal::log(" ");
@@ -119,7 +119,7 @@ void drawPlayer(){
 }
 
 void updateTeamGraphic(){
-    teamGraphicSE icons = {23, 6, 22};
+    teamGraphicSE icons = {1, 12, 22};
     drawTeamGraphic(&icons, currPlayer.team+1);
 }
 
