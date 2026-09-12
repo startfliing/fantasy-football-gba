@@ -19,9 +19,9 @@ void drawDigit(numTextSE* num, int digit, bool first){
     num->tempInd++;
 }
 
-void drawNumTextSE(numTextSE* num, int val){
-    num->tempInd = 0;
-    drawDigit(num, val/100, false);
-    drawDigit(num, (val/10)%10, false);
+void drawNumTextSE(numTextSE* num, int val, bool time){
+    num->tempInd = 1;
+    //drawDigit(num, val/100, false);
+    drawDigit(num, (val/10)%10, time);
     drawDigit(num, val%10, true);
 }

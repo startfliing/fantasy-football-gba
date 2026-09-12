@@ -64,13 +64,16 @@ enum PlayType{
 // down/distance/field position/clock. yardLine is 0-100, measured from the
 // possessing team's own goal line (100 = opponent's goal line / touchdown)
 struct GameSituation{
-    int quarter;
-    int clock;
-    int down;
-    int distance;
-    int yardLine;
+    int quarter;    //Quarter
+    int clock;      //Time left in current Quarter
+    int down;       //down
+    int distance;   //distance for first down
+    int yardLine;   //where team is
     int possession; // 0 = team1 has the ball, 1 = team2 has the ball
 };
+
+//if the team 1 is 3rd and 12 at the 45 yard line in the 4th with 15 seconds left
+//you could write it as {possession} {down} and {distance} at the {yardLine} in {quarter} with {clock}
 
 struct PlayResult{
     PlayType type;

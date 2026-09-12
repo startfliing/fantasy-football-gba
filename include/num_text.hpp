@@ -15,6 +15,6 @@ void initNumTextSE();
 
 void drawDigit(numTextSE* num, int digit, bool first);
 
-void drawNumTextSE(numTextSE* num, int val);
+void drawNumTextSE(numTextSE* num, int val, bool time = false);
 
 #endif

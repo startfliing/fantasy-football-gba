@@ -149,5 +149,7 @@ GameState pregameState(){
     sd->currSeed = qran();
     save();
 
+    isPregameLoaded = false;
+
     return (GameState)&ingameState;
 }

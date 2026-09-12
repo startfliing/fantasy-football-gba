@@ -339,6 +339,8 @@ bool stepPlay(Game* game, GameSituation* situation, PlayResult* outResult){
         situation->quarter++;
         situation->clock = QUARTER_LENGTH;
         if(situation->quarter > 4){
+            situation->clock = 0;
+            situation->quarter = 4;
             return false;
         }
     }
