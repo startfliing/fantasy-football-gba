@@ -124,6 +124,14 @@ GameState pregameState(){
             drawWeeklyMatchups(currWeek, icons, &weekNum);
         }
 
+        if(key_hit(KEY_SELECT)){
+            qran();
+            generateSeasonSchedule(&currSeason);
+            currWeek = 0;
+            drawWeeklyMatchups(currWeek, icons, &weekNum);
+            vofs = 0;
+        }
+
         vofs = clamp(vofs + key_tri_vert()*2, 0, 192);
         REG_BG1VOFS = vofs;
         REG_BG2VOFS = vofs;

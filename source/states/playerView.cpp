@@ -3,6 +3,7 @@
 #include "players.h"
 #include "pos_lut.hpp"
 #include "team_lut.hpp"
+#include "season.hpp"
 
 #include "pregame.hpp"
 #include "ingame.hpp"
@@ -173,6 +174,11 @@ GameState playerViewState(){
 
         if(key_hit(KEY_L)){
             return (GameState)&pregameState;
+        }
+
+        if(key_hit(KEY_SELECT)){
+            qran();
+            generateSeasonSchedule(&currSeason);
         }
 
 
