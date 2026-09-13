@@ -15,6 +15,8 @@
 #include "ingameBG.h"
 #include "football.h"
 #include "yardText.h"
+#include "blackWeekNum.h"
+#include "ingameHeader.h"
 
 //how many frames to hold each round's scoreboard on screen before advancing,
 //so the player can watch every game of the week tick along together
@@ -123,8 +125,7 @@ void updateGameSituation(GameSituation *prevSituation, GameSituation *currSituat
 };
 
 static void scroll(int* scrolly, bool byesThisWeek){
-    *scrolly = clamp(*scrolly + (key_tri_vert()*2), 0, 352 - (byesThisWeek ? 32 : 0));
-    REG_BG0VOFS = *scrolly;
+    *scrolly = clamp(*scrolly + (key_tri_vert()*2), 512-24, 512+352 - (byesThisWeek ? 32 : 0));
     REG_BG1VOFS = *scrolly;
     REG_BG2VOFS = *scrolly;
 }
@@ -133,14 +134,38 @@ void loadIngameGraphics(){
     LZ77UnCompVram(footballTiles, &tile_mem[0][22]);
     LZ77UnCompVram(footballPal, pal_bg_bank[11]);
 
+    LZ77UnCompVram(ingameHeaderTiles, &tile_mem[0][181]);
+    LZ77UnCompVram(ingameHeaderMap, &se_mem[16]);
+
     LZ77UnCompVram(ingameBGTiles, &tile_mem[0][27]);
     LZ77UnCompVram(ingameBGPal, pal_bg_bank[12]);
     LZ77UnCompVram(ingameBGMap, se_mem[20]);
     for(int i = 0 ; i < 32*32; i++){
         se_mem[20][i] |= SE_PALBANK(12);
+        se_mem[16][i] |= SE_PALBANK(12);
     }
 
     LZ77UnCompVram(yardTextTiles, &tile_mem[0][149]);
+    LZ77UnCompVram(blackWeekNumTiles, &tile_mem[0][166]);
+    LZ77UnCompVram(blackWeekNumMap, &se_mem[21]);
+
+    memcpy16(tile_mem_obj, tp_fontTiles, tp_fontTilesLen/2);
+    LZ77UnCompVram(tp_fontPal, pal_obj_mem);
+
+    int upcomingWeek = currSeason.currentWeek + 1;
+
+    if(upcomingWeek >= 10){
+        obj_set_attr(&obj_mem[2],
+            ATTR0_BUILD(72, 2, 0, 0, 0, 1, 0),
+            ATTR1_BUILDR(136, 0, 0, 0),
+            ATTR2_BUILD(((upcomingWeek/10) * 2)+1, 0, 0)
+        );
+    }
+    obj_set_attr(&obj_mem[3],
+        ATTR0_BUILD(72, 2, 0, 0, 0, 0, 0),
+        ATTR1_BUILDR(144, 0, 0, 0),
+        ATTR2_BUILD(((upcomingWeek%10) * 2)+1, 0, 0)
+    );
 }
 
 int framePaceTiers[5] = {
@@ -155,28 +180,33 @@ GameState ingameState(){
 
 
     //fade to black
-    REG_BLDCNT = BLD_TOP(BLD_ALL) | BLD_BLACK | BLD_BOT(BLD_BACKDROP);
+    REG_BLDCNT = BLD_TOP(BLD_BG0 | BLD_BG1 | BLD_BG2 | BLD_BG3 | BLD_OBJ) | BLD_BLACK | BLD_BOT(BLD_BACKDROP);
     for(int y = 0; y < 33; y++){
-        
+        REG_BLDY = y>>1;
+        VBlankIntrWait();
     }
 
     SBB_CLEAR(16);
     SBB_CLEAR(17);
     SBB_CLEAR(18);
     SBB_CLEAR(19);
-    REG_BG0CNT = BG_BUILD(0, 16, 2, 0, 1, 0, 0); //BG0 text
-    REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 0, 0, 0); // graphics and scores and football
-    REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 3, 0, 0); //background
+    REG_BG0CNT = BG_BUILD(0, 16, 0, 0, 1, 0, 0); // Header
+    REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 2, 0, 0); // graphics and scores and football
+    REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 3, 0, 0); // background
+    REG_BG3CNT = BG_BUILD(0, 21, 0, 0, 0, 0, 0);
 
-    REG_BG0HOFS = 4;
     REG_BG1HOFS = 4;
     REG_BG2HOFS = 4;
 
     REG_DISPCNT = DCNT_MODE0 | 
         DCNT_BG0 | 
         DCNT_BG1 | 
-        DCNT_BG2;
+        DCNT_BG2 |
+        DCNT_BG3 |
+        DCNT_OBJ |
+        DCNT_OBJ_1D;
     
+    oam_init(obj_mem, 4);
     //fade in WEEK #
 
     initNumTextSE();
@@ -202,14 +232,20 @@ GameState ingameState(){
     bool active[SEASON_MAX_GAMES_PER_WEEK];
 
     //display Week # while building other SBB
-    SBB_CLEAR(16);
-    SBB_CLEAR(17);
     SBB_CLEAR(18);
     SBB_CLEAR(19);
 
-    REG_BG0VOFS = 0;
-    REG_BG1VOFS = 0;
+    REG_BG0VOFS = 4;
+    REG_BG1VOFS = 512-24;
+    REG_BG2VOFS = 512-24;
     scrollY = 0;
+
+    REG_BLDCNT = BLD_TOP(BLD_BG3 | BLD_OBJ) | BLD_BLACK | BLD_BOT(BLD_BACKDROP);
+
+    for(int y = 0; y < 33; y++){
+        REG_BLDY = 16-(y>>1);
+        VBlankIntrWait();
+    }
 
     //build teams while game is blacked out
     for(int g = 0; g < week.gameCount; g++){
@@ -227,12 +263,31 @@ GameState ingameState(){
         drawTeamGraphic(&icons[g][1], games[g].team2.teamInd);
     }
 
+    REG_BLDCNT = BLD_TOP(BLD_BG3 | BLD_OBJ) | BLD_BLACK | BLD_BOT(BLD_BACKDROP);
     //fade in
+    for(int y = 0; y < 32; y++){
+        //REG_BLDALPHA = BLDA_BUILD(15-(y>>1), y>>1);
+        REG_BLDY = y>>1;
+        VBlankIntrWait();
+    }
+
+    REG_DISPCNT = DCNT_MODE0 | 
+        DCNT_BG0 | 
+        DCNT_BG1 | 
+        DCNT_BG2;
+
+    REG_BLDCNT = BLD_TOP(BLD_BG0 | BLD_BG1 | BLD_BG2) | BLD_BLACK | BLD_BOT(BLD_BACKDROP);
+
+    for(int y = 0; y < 32; y++){
+        REG_BLDY = 16-(y>>1);
+        VBlankIntrWait();
+    }
+
+    for(int y = 10; y >0; y--){
+        VBlankIntrWait();
+    }
 
 
-    //steps every game of the week forward one play at a time in lockstep,
-    //redrawing the scoreboard after each round, until all games are final
-    bool skipPacing = false;
     bool anyActive = true;
     int framePaceTier = 0;
     while(anyActive){
@@ -263,7 +318,7 @@ GameState ingameState(){
     }
 
     //Terminal::log("Press Start to continue");
-    while(!key_hit(KEY_START)){
+    while(!key_hit(KEY_FIRE) && !key_hit(KEY_SPECIAL)){
         key_poll();
         VBlankIntrWait();
         scroll(&scrollY, week.byeTeam1 != -1);
