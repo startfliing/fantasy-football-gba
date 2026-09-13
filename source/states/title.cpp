@@ -40,18 +40,22 @@ GameState titleState(){
     LZ77UnCompVram(skyTiles, tile_mem[0]);
     LZ77UnCompVram(skyMap, se_mem[16]);
     REG_BG0VOFS = 0;
+    REG_BG0HOFS = 0;
 
     LZ77UnCompVram(stadiumTiles, &tile_mem[0][340]);
     LZ77UnCompVram(stadiumMap, se_mem[19]);
     REG_BG1VOFS = 0;
+    REG_BG1HOFS = 0;
 
     LZ77UnCompVram(pitchTiles, &tile_mem[0][563]);
     LZ77UnCompVram(pitchMap, se_mem[20]);
     REG_BG2VOFS = 0;
+    REG_BG2HOFS = 0;
 
     LZ77UnCompVram(title_textTiles, &tile_mem[0][602]);
     LZ77UnCompVram(title_textMap, se_mem[22]);
     REG_BG3VOFS = 0;
+    REG_BG3HOFS = 0;
 
     REG_BLDCNT = BLD_BUILD(BLD_BG3, BLD_BG0 | BLD_BG1 | BLD_BG2, 1);
     REG_BLDALPHA = BLDA_BUILD(0, 31);

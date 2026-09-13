@@ -4,6 +4,7 @@
 #include "postgame.hpp"
 #include "ingame.hpp"
 #include "seasonEnd.hpp"
+#include "title.hpp"
 
 #include "terminal.hpp"
 #include "save.hpp"
@@ -116,6 +117,7 @@ GameState postgameState(){
             g_saveData.season = currSeason;
             g_saveData.hasSavedSeason = true;
             save();
+            return (GameState)&titleState;
         }
 
         key_poll();
