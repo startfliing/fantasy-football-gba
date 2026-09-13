@@ -1,9 +1,8 @@
 // win state, pick new team member. randomly generated choice of 3
 
-//exit states: pregame, title??
-#include "postgame.hpp"
+#include "loadSave.hpp"
 #include "ingame.hpp"
-#include "seasonEnd.hpp"
+#include "pregame.hpp"
 
 #include "terminal.hpp"
 #include "save.hpp"
@@ -14,10 +13,10 @@
 #include "season.hpp"
 
 #include "postGameBG.h"
-#include "postGameHeader.h"
+#include "loadSaveHeader.h"
 #include "tp_font.h"
 
-void loadPostGameGraphics(){
+void loadSaveGraphics(){
     LZ77UnCompVram(postGameBGTiles, &tile_mem[0][124]);
     LZ77UnCompVram(postGameBGPal, pal_bg_bank[12]);
     pal_bg_bank[12][0] = RGB15(0,0,0);
@@ -25,8 +24,8 @@ void loadPostGameGraphics(){
     for(int i = 0; i < 32 * 64; i++){
         se_mem[16][i] |= SE_PALBANK(12);
     }
-    LZ77UnCompVram(postGameHeaderTiles, &tile_mem[0][31]);
-    LZ77UnCompVram(postGameHeaderMap, &se_mem[20]);
+    LZ77UnCompVram(loadSaveHeaderTiles, &tile_mem[0][31]);
+    LZ77UnCompVram(loadSaveHeaderMap, &se_mem[20]);
     for(int i = 0; i < 32 * 32; i++){
         se_mem[20][i] |= SE_PALBANK(12);
     }
@@ -48,7 +47,7 @@ void loadPostGameGraphics(){
     );
 }
 
-GameState postgameState(){
+GameState loadSaveState(){
 
     REG_DISPCNT = DCNT_MODE0 | 
         DCNT_BG0 |
@@ -57,10 +56,9 @@ GameState postgameState(){
         DCNT_OBJ_1D |
         DCNT_OBJ;
 
-    SBB_CLEAR(16);
-    SBB_CLEAR(17);
-    SBB_CLEAR(18);
-    SBB_CLEAR(19);
+    SBB_CLEAR(16); SBB_CLEAR(17);
+    SBB_CLEAR(18); SBB_CLEAR(19);
+    SBB_CLEAR(20);
     REG_BG0CNT = BG_BUILD(0, 16, 2, 0, 2, 0, 0); // postGameBG
     REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 1, 0, 0); // graphics and records
     REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 0, 0, 0); // postGameHeader
@@ -74,9 +72,11 @@ GameState postgameState(){
     REG_BG2VOFS = 4;
 
     oam_init(oam_mem, 128);
+    currSeason = g_saveData.season;
+    sqran(g_saveData.currSeed);
     initNumTextSE();
     initTeamGraphics(1);
-    loadPostGameGraphics();
+    loadSaveGraphics();
 
     teamGraphicSE icons[16][2];
     int y, x;
@@ -112,20 +112,16 @@ GameState postgameState(){
         REG_BG1VOFS = vofs;
 
         if(key_hit(KEY_SELECT)){
+            g_saveData.hasSavedSeason = false;
             g_saveData.currSeed = qran();
-            g_saveData.season = currSeason;
-            g_saveData.hasSavedSeason = true;
             save();
+            return (GameState)&pregameState;
         }
 
         key_poll();
         VBlankIntrWait();
     }
     key_poll();
-    
-    if(currSeason.currentWeek >= SEASON_WEEKS){
-        return (GameState)&seasonEndState;
-    }
 
     return (GameState)&ingameState;
 }

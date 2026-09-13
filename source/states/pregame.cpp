@@ -81,7 +81,8 @@ GameState pregameState(){
         SBB_CLEAR(17); SBB_CLEAR(18);
         SBB_CLEAR(19); SBB_CLEAR(20);
         generateSeasonSchedule(&currSeason);
-        
+        currWeek = 0;
+        vofs = 0;
 
         isPregameLoaded = true;
         initNumTextSE();
@@ -96,6 +97,11 @@ GameState pregameState(){
     }
 
     drawBG();
+
+    REG_BG0HOFS = 0;
+    REG_BG1HOFS = 0;
+    REG_BG2HOFS = 0;
+    REG_BG3HOFS = 0;
 
     REG_BG0VOFS = 4;
     REG_BG1VOFS = vofs;

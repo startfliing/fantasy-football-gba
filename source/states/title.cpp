@@ -13,6 +13,9 @@
 #include "pitch.h"
 #include "title-text.h"
 
+#include "save.hpp"
+#include "loadSave.hpp"
+
 void updateTitleVOFS(int vofs){
     REG_BG0VOFS = vofs;
     REG_BG1VOFS = vofs;
@@ -91,6 +94,12 @@ GameState titleState(){
         key_poll();
         VBlankIntrWait();
     }
+
+    saveData* sd = getSaveData();
+    if(sd->hasSavedSeason){
+        key_poll();
+        return (GameState)&loadSaveState;
+    } 
     
     // For now, loop back to itself
     // Later you can transition to other states like: mainMenuState, playState, etc.

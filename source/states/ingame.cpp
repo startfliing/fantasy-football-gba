@@ -201,6 +201,8 @@ GameState ingameState(){
     REG_BG1HOFS = 4;
     REG_BG2HOFS = 4;
 
+    REG_BG3VOFS = 0;
+
     REG_DISPCNT = DCNT_MODE0 | 
         DCNT_BG0 | 
         DCNT_BG1 | 

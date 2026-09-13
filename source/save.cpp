@@ -11,6 +11,7 @@ void sramCpy(u8* src, u8* dst){
 }
 
 void save(){
+    g_saveData.magic = SAVE_MAGIC;
     u8* cpySrc = (u8*)&g_saveData;
     u8* cpyDst = sram_mem;
 
@@ -18,10 +19,18 @@ void save(){
 }
 
 void load(){
-    //TODO: remove for real game save data
     u8* cpySrc = sram_mem;
     u8* cpyDst = (u8*)&g_saveData;
 
     sramCpy(cpySrc, cpyDst);
+    if(g_saveData.magic != SAVE_MAGIC){
+        g_saveData.magic = SAVE_MAGIC;
+        g_saveData.currSeed = 0;
+        g_saveData.hasSavedSeason = false;
+    }
     g_saveDataLoaded = true;
+}
+
+saveData* getSaveData(){
+    return &g_saveData;
 }
