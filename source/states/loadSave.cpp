@@ -48,6 +48,11 @@ void loadSaveGraphics(){
 }
 
 GameState loadSaveState(){
+    key_poll();
+    saveData* sd = getSaveData();
+    if(!sd->hasSavedSeason){
+        return (GameState)&pregameState;
+    } 
 
     REG_DISPCNT = DCNT_MODE0 | 
         DCNT_BG0 |

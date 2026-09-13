@@ -100,14 +100,8 @@ GameState titleState(){
         key_poll();
         VBlankIntrWait();
     }
-
-    saveData* sd = getSaveData();
-    if(sd->hasSavedSeason){
-        key_poll();
-        return (GameState)&loadSaveState;
-    } 
     
     // For now, loop back to itself
     // Later you can transition to other states like: mainMenuState, playState, etc.
-    return (GameState)&pregameState;
+    return (GameState)&loadSaveState;
 }
