@@ -37,6 +37,7 @@ struct Season{
 // one week off, with matchups shuffled (via qran()) for variety between seasons
 void generateSeasonSchedule(Season* season);
 void recordWeekResult(Season* season, int weekIndex, int gameIndex, int team1Score, int team2Score);
+void getSortedStandings(const Season* season, int sortedTeams[SEASON_TEAMS]);
 
 extern Season currSeason;
 

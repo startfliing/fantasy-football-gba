@@ -140,3 +140,54 @@ void recordWeekResult(Season* season, int weekIndex, int gameIndex, int team1Sco
         team1Record.losses++;
     }
 }
+
+static bool compareTeamStandings(const Season* season, int a, int b){
+    const TeamSeasonRecord& recA = season->teamRecords[a];
+    const TeamSeasonRecord& recB = season->teamRecords[b];
+
+    int totalA = recA.wins + recA.losses;
+    int totalB = recB.wins + recB.losses;
+
+    // Tier 1: Record (winning percentage)
+    int winRateDiff = 0;
+    if(totalA > 0 && totalB > 0){
+        winRateDiff = (recA.wins * totalB) - (recB.wins * totalA);
+    }else if(totalA > 0){
+        winRateDiff = (recA.wins > 0) ? 1 : -1;
+    }else if(totalB > 0){
+        winRateDiff = (recB.wins > 0) ? -1 : 1;
+    }
+
+    if(winRateDiff != 0){
+        return winRateDiff > 0;
+    }
+
+    // Tier 2: Points scored so far (highest to lowest)
+    if(recA.pointsFor != recB.pointsFor){
+        return recA.pointsFor > recB.pointsFor;
+    }
+
+    // Tier 3: Points scored against (lowest to highest)
+    if(recA.pointsAgainst != recB.pointsAgainst){
+        return recA.pointsAgainst < recB.pointsAgainst;
+    }
+
+    // Tie-breaker: team index
+    return a < b;
+}
+
+void getSortedStandings(const Season* season, int sortedTeams[SEASON_TEAMS]){
+    for(int i = 0; i < SEASON_TEAMS; i++){
+        sortedTeams[i] = i;
+    }
+
+    for(int i = 1; i < SEASON_TEAMS; i++){
+        int key = sortedTeams[i];
+        int j = i - 1;
+        while(j >= 0 && compareTeamStandings(season, key, sortedTeams[j])){
+            sortedTeams[j + 1] = sortedTeams[j];
+            j--;
+        }
+        sortedTeams[j + 1] = key;
+    }
+}

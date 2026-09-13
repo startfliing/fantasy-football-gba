@@ -7,15 +7,107 @@
 
 #include "terminal.hpp"
 #include "save.hpp"
+#include "num_text.hpp"
+#include "team_graphics.hpp"
 
 #include "play.hpp"
 #include "season.hpp"
 
+#include "postGameBG.h"
+#include "postGameHeader.h"
+#include "tp_font.h"
+
+void loadPostGameGraphics(){
+    LZ77UnCompVram(postGameBGTiles, &tile_mem[0][124]);
+    LZ77UnCompVram(postGameBGPal, pal_bg_bank[12]);
+    LZ77UnCompVram(postGameBGMap, &se_mem[16]);
+    for(int i = 0; i < 32 * 64; i++){
+        se_mem[16][i] |= SE_PALBANK(12);
+    }
+    LZ77UnCompVram(postGameHeaderTiles, &tile_mem[0][31]);
+    LZ77UnCompVram(postGameHeaderMap, &se_mem[20]);
+    for(int i = 0; i < 32 * 32; i++){
+        se_mem[20][i] |= SE_PALBANK(12);
+    }
+
+    memcpy16(tile_mem_obj, tp_fontTiles, tp_fontTilesLen/2);
+    LZ77UnCompVram(tp_fontPal, pal_obj_mem);
+
+    if(currSeason.currentWeek >= 10){
+        obj_set_attr(&obj_mem[0],
+            ATTR0_BUILD(4, 2, 0, 0, 0, 1, 0),
+            ATTR1_BUILDR(208, 0, 0, 0),
+            ATTR2_BUILD(((currSeason.currentWeek/10) * 2)+1, 0, 0)
+        );
+    }
+    obj_set_attr(&obj_mem[1],
+        ATTR0_BUILD(4, 2, 0, 0, 0, 0, 0),
+        ATTR1_BUILDR(216, 0, 0, 0),
+        ATTR2_BUILD(((currSeason.currentWeek%10) * 2)+1, 0, 0)
+    );
+}
+
 GameState postgameState(){
 
-    Terminal::log("End of Week %%!", currSeason.currentWeek);
+    REG_DISPCNT = DCNT_MODE0 | 
+        DCNT_BG0 |
+        DCNT_BG1 |
+        DCNT_BG2 |
+        DCNT_OBJ_1D |
+        DCNT_OBJ;
 
+    SBB_CLEAR(16);
+    SBB_CLEAR(17);
+    SBB_CLEAR(18);
+    SBB_CLEAR(19);
+    REG_BG0CNT = BG_BUILD(0, 16, 2, 0, 2, 0, 0); // postGameBG
+    REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 1, 0, 0); // graphics and records
+    REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 0, 0, 0); // postGameHeader
+
+    REG_BG0HOFS = 4;
+    REG_BG1HOFS = 4;
+    REG_BG2HOFS = 0;
+
+    REG_BG0VOFS = 4;
+    REG_BG1VOFS = 4;
+    REG_BG2VOFS = 4;
+
+    oam_init(oam_mem, 128);
+    initNumTextSE();
+    initTeamGraphics(1);
+    loadPostGameGraphics();
+
+    teamGraphicSE icons[11][3];
+    int y, x;
+    for(int r = 0; r < 11; r++){
+        y = (r*5) + 6;
+        for(int c = 0; c < 3; c++){
+            x = c * 10;
+            icons[r][c] = {x + 1, y, 18, 3};
+        }
+    }
+    
+
+    int standings[SEASON_TEAMS];
+    getSortedStandings(&currSeason, standings);
+    teamGraphicSE* iconPtr = &icons[0][0];
+    for(int i = 0; i < SEASON_TEAMS; i++){
+        drawTeamGraphic(&iconPtr[i], standings[i]+1);
+        numTextSE record[2] = {
+            {iconPtr[i].x+3,iconPtr[i].y+1,18,0},
+            {iconPtr[i].x+6,iconPtr[i].y+1,18,0}
+        };
+        drawNumTextSE(&record[0], currSeason.teamRecords[standings[i]].wins);
+        drawNumTextSE(&record[1], currSeason.teamRecords[standings[i]].losses);
+    }
+
+    int vofs = 0;
     while(!key_hit(KEY_START)){
+
+        vofs = clamp(vofs + (key_tri_vert()*2), 4, 324);
+        REG_BG0VOFS = vofs;
+        REG_BG1VOFS = vofs;
+
         key_poll();
         VBlankIntrWait();
     }
