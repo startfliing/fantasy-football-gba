@@ -8,6 +8,7 @@
 #include "play.hpp"
 #include "team_lut.hpp"
 #include "season.hpp"
+#include "seasonEnd.hpp"
 
 #include "num_text.hpp"
 #include "team_graphics.hpp"
@@ -334,6 +335,10 @@ GameState ingameState(){
         recordWeekResult(&currSeason, currSeason.currentWeek, g, games[g].team1.score, games[g].team2.score);
     }
     currSeason.currentWeek++;
+
+    if(currSeason.currentWeek >= 18){
+        return (GameState)&seasonEndState;
+    }
 
     return (GameState)&postgameState;
 }
