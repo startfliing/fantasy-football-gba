@@ -16,6 +16,7 @@ struct WeekMatchup{
 struct TeamSeasonRecord{
     int wins;
     int losses;
+    int ties;
     int pointsFor;
     int pointsAgainst;
 };

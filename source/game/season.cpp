@@ -32,7 +32,7 @@ void generateSeasonSchedule(Season* season){
 
     season->currentWeek = 0;
     for(int t = 0; t < SEASON_TEAMS; t++){
-        season->teamRecords[t] = {0, 0, 0, 0};
+        season->teamRecords[t] = {0, 0, 0, 0, 0};
     }
 
     for(int wk = 0; wk < SEASON_WEEKS; wk++){
@@ -138,6 +138,9 @@ void recordWeekResult(Season* season, int weekIndex, int gameIndex, int team1Sco
     }else if(team2Score > team1Score){
         team2Record.wins++;
         team1Record.losses++;
+    }else{
+        team1Record.ties++;
+        team2Record.ties++;
     }
 }
 
@@ -145,17 +148,21 @@ static bool compareTeamStandings(const Season* season, int a, int b){
     const TeamSeasonRecord& recA = season->teamRecords[a];
     const TeamSeasonRecord& recB = season->teamRecords[b];
 
-    int totalA = recA.wins + recA.losses;
-    int totalB = recB.wins + recB.losses;
+    int totalA = recA.wins + recA.losses + recA.ties;
+    int totalB = recB.wins + recB.losses + recB.ties;
 
-    // Tier 1: Record (winning percentage)
+    // Tier 1: Record (winning percentage: (Wins + 0.5 * Ties) / TotalGames)
+    // Scaled by 2 to keep integer precision: (2 * Wins + Ties) / (2 * TotalGames)
+    int ptsA = (recA.wins * 2) + recA.ties;
+    int ptsB = (recB.wins * 2) + recB.ties;
+
     int winRateDiff = 0;
     if(totalA > 0 && totalB > 0){
-        winRateDiff = (recA.wins * totalB) - (recB.wins * totalA);
+        winRateDiff = (ptsA * totalB) - (ptsB * totalA);
     }else if(totalA > 0){
-        winRateDiff = (recA.wins > 0) ? 1 : -1;
+        winRateDiff = (ptsA > 0) ? 1 : -1;
     }else if(totalB > 0){
-        winRateDiff = (recB.wins > 0) ? -1 : 1;
+        winRateDiff = (ptsB > 0) ? -1 : 1;
     }
 
     if(winRateDiff != 0){

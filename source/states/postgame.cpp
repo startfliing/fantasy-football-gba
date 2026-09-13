@@ -64,12 +64,12 @@ GameState postgameState(){
     REG_BG1CNT = BG_BUILD(0, 18, 2, 0, 1, 0, 0); // graphics and records
     REG_BG2CNT = BG_BUILD(0, 20, 0, 0, 0, 0, 0); // postGameHeader
 
-    REG_BG0HOFS = 4;
-    REG_BG1HOFS = 4;
+    REG_BG0HOFS = 0;
+    REG_BG1HOFS = 252;
     REG_BG2HOFS = 0;
 
-    REG_BG0VOFS = 4;
-    REG_BG1VOFS = 4;
+    REG_BG0VOFS = 512-40;
+    REG_BG1VOFS = 512-40;
     REG_BG2VOFS = 4;
 
     oam_init(oam_mem, 128);
@@ -77,13 +77,13 @@ GameState postgameState(){
     initTeamGraphics(1);
     loadPostGameGraphics();
 
-    teamGraphicSE icons[11][3];
+    teamGraphicSE icons[16][2];
     int y, x;
-    for(int r = 0; r < 11; r++){
-        y = (r*5) + 6;
-        for(int c = 0; c < 3; c++){
-            x = c * 10;
-            icons[r][c] = {x + 1, y, 18, 3};
+    for(int r = 0; r < 16; r++){
+        y = r*4;
+        for(int c = 0; c < 2; c++){
+            x = c * 15;
+            icons[r][c] = {x, y, 18, 3};
         }
     }
     
@@ -93,18 +93,20 @@ GameState postgameState(){
     teamGraphicSE* iconPtr = &icons[0][0];
     for(int i = 0; i < SEASON_TEAMS; i++){
         drawTeamGraphic(&iconPtr[i], standings[i]+1);
-        numTextSE record[2] = {
+        numTextSE record[3] = {
             {iconPtr[i].x+3,iconPtr[i].y+1,18,0},
-            {iconPtr[i].x+6,iconPtr[i].y+1,18,0}
+            {iconPtr[i].x+7,iconPtr[i].y+1,18,0},
+            {iconPtr[i].x+11,iconPtr[i].y+1,18,0}
         };
         drawNumTextSE(&record[0], currSeason.teamRecords[standings[i]].wins);
         drawNumTextSE(&record[1], currSeason.teamRecords[standings[i]].losses);
+        drawNumTextSE(&record[2], currSeason.teamRecords[standings[i]].ties);
     }
 
-    int vofs = 0;
+    u16 vofs = 0;
     while(!key_hit(KEY_START)){
 
-        vofs = clamp(vofs + (key_tri_vert()*2), 4, 324);
+        vofs = clamp(vofs + (key_tri_vert()*2), 512-40, 512+352);
         REG_BG0VOFS = vofs;
         REG_BG1VOFS = vofs;
 
