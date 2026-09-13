@@ -89,6 +89,7 @@ void initTeamGraphics(int cbb){
     //load palettes
     for(i = 1; i < 11; i++){
         LZ77UnCompVram(teamPalettes[i], &pal_bg_mem[i*16]);
+        pal_bg_bank[i][0] = RGB15(0,0,0);
     }
 
     //load image tiles

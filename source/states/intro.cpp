@@ -29,6 +29,7 @@ void loadIntro(){
 void loadMNG(){
     //load palette
     memcpy16(pal_bg_mem, mngPal, mngPalLen/2);
+    pal_bg_bank[0][0] = RGB15(0,0,0);
 
     //load tiles
     LZ77UnCompVram(mngTiles, tile_mem[INTRO_CBB]);
@@ -40,7 +41,7 @@ void loadMNG(){
 void loadGBAJAM1(){
     //load palette
     memcpy16(pal_bg_mem, gbajam1Pal, gbajam1PalLen/2);
-
+    pal_bg_bank[0][0] = RGB15(0,0,0);
     //load tiles
     LZ77UnCompVram(gbajam1Tiles, tile_mem[INTRO_CBB]);
     

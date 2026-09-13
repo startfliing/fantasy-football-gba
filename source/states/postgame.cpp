@@ -20,6 +20,7 @@
 void loadPostGameGraphics(){
     LZ77UnCompVram(postGameBGTiles, &tile_mem[0][124]);
     LZ77UnCompVram(postGameBGPal, pal_bg_bank[12]);
+    pal_bg_bank[12][0] = RGB15(0,0,0);
     LZ77UnCompVram(postGameBGMap, &se_mem[16]);
     for(int i = 0; i < 32 * 64; i++){
         se_mem[16][i] |= SE_PALBANK(12);

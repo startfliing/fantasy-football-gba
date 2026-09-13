@@ -139,6 +139,9 @@ void loadIngameGraphics(){
 
     LZ77UnCompVram(ingameBGTiles, &tile_mem[0][27]);
     LZ77UnCompVram(ingameBGPal, pal_bg_bank[12]);
+    for(int i = 0; i < 16; i++){
+        pal_bg_bank[i][0] = RGB15(0,0,0);
+    }
     LZ77UnCompVram(ingameBGMap, se_mem[20]);
     for(int i = 0 ; i < 32*32; i++){
         se_mem[20][i] |= SE_PALBANK(12);

@@ -2,6 +2,7 @@
 
 void initNumTextSE(){
     LZ77UnCompVram(tp_fontPal, pal_bg_mem);
+    pal_bg_bank[0][0] = RGB15(0,0,0);
     memcpy16(&tile_mem[0][1], tp_fontTiles, tp_fontTilesLen/2);
 }
 

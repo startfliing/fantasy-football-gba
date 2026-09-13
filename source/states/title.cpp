@@ -33,6 +33,7 @@ GameState titleState(){
     REG_BG3CNT = BG_BUILD(0, 21, 2, 0, 0, 0, 0); SBB_CLEAR(21); SBB_CLEAR(22);
 
     LZ77UnCompVram(skyPal, pal_bg_bank[0]);
+    pal_bg_bank[0][0] = RGB15(0,0,0);
     LZ77UnCompVram(skyTiles, tile_mem[0]);
     LZ77UnCompVram(skyMap, se_mem[16]);
     REG_BG0VOFS = 0;
