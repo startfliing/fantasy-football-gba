@@ -193,7 +193,7 @@ void Terminal::updateScreen(){
     for(int i = 0; i < TERMINAL_TEXT_HEIGHT; i++){
         for(int j = 0; j < TERMINAL_TEXT_WIDTH; j++){
             //draw onto screen by iterating through VRAM and screen data at the same time
-            se_mem[text_sbb][(TERMINAL_TOP_ROW*32)+TERMINAL_LEFT_COL+(i*32)+j] = (temp_line*TERMINAL_TEXT_WIDTH)+j+1 | SE_PALBANK(11);
+            se_mem[text_sbb][(TERMINAL_TOP_ROW*32)+TERMINAL_LEFT_COL+(i*32)+j] = ((temp_line*TERMINAL_TEXT_WIDTH)+j+1) | SE_PALBANK(11);
         }
         temp_line = (temp_line+1)%TERMINAL_TEXT_HEIGHT;
     }
