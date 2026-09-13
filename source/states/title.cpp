@@ -84,6 +84,8 @@ GameState titleState(){
         VBlankIntrWait();
     }
 
+    REG_BLDALPHA = BLDA_BUILD(31, 0);
+
     // make sure that if player skips
     // Title is set to look correctly
     key_poll();
