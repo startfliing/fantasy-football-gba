@@ -62,7 +62,7 @@ GameState introState(){
 
     //do this twice, start skips both
     int keyHit = key_hit(KEY_ANY);
-    int phase = 0; //phase one MNG, phase 2, gbaJam
+    int phase = 1; //phase one MNG, phase 2, gbaJam
 
     //bottom fades in, sustains for a few seconds, fades out
     while(!keyHit && phase < 2){
